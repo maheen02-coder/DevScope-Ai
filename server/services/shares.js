@@ -116,14 +116,14 @@ export function buildScoreBadge(score) {
   const message = value === null ? 'not scored' : `${value}/100`
   const color =
     value === null
-      ? '#6b7280'
+      ? '#879caa'
       : value >= 80
-        ? '#10b981'
+        ? '#79c2b2'
         : value >= 60
-          ? '#7c9cff'
+          ? '#78bdd2'
           : value >= 40
-            ? '#f59e0b'
-            : '#f43f5e'
+            ? '#d9b884'
+            : '#e08f99'
   const labelWidth = 62
   const messageWidth = 48
   const width = labelWidth + messageWidth

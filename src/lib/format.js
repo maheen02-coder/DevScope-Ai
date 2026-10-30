@@ -190,7 +190,7 @@ const languageColors = {
 }
 
 export function languageColor(language) {
-  return languageColors[language] || '#7c9cff'
+  return languageColors[language] || '#78bdd2'
 }
 
 export function pluralize(count, singular, plural) {

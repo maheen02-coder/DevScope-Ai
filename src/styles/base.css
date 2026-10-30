@@ -1,54 +1,65 @@
 :root {
   color-scheme: dark;
 
-  --bg: #07080c;
-  --bg-elevated: #0a0c12;
-  --surface: #0e1118;
-  --surface-2: #121621;
-  --surface-3: #171c28;
-  --surface-hover: #1a2030;
-  --border: #1c2331;
-  --border-strong: #2a3345;
-  --border-accent: rgba(124, 156, 255, 0.38);
+  /* Abyssal blue, sea glass, and platinum — the DevScope atelier palette. */
+  --bg: #04070a;
+  --bg-elevated: #070d12;
+  --surface: #08111a;
+  --surface-2: #0b1620;
+  --surface-3: #0f1e2b;
+  --surface-hover: #142736;
+  --border: #1a3040;
+  --border-strong: #28485d;
+  --border-accent: rgba(120, 189, 210, 0.38);
 
-  --text: #e9edf5;
-  --text-secondary: #a8b2c5;
-  --text-muted: #737f95;
-  --text-faint: #556074;
+  --text: #edf4f7;
+  --text-secondary: #b6c7d1;
+  --text-muted: #879caa;
+  --text-faint: #5c7281;
 
-  --accent: #7c9cff;
-  --accent-strong: #5f7cff;
-  --accent-soft: rgba(124, 156, 255, 0.12);
-  --accent-softer: rgba(124, 156, 255, 0.06);
-  --mint: #6ee7c0;
-  --mint-soft: rgba(110, 231, 192, 0.12);
-  --amber: #f5c66b;
-  --amber-soft: rgba(245, 198, 107, 0.12);
-  --rose: #ff8595;
-  --rose-soft: rgba(255, 133, 149, 0.12);
-  --violet: #b79cff;
-  --violet-soft: rgba(183, 156, 255, 0.12);
+  --accent: #78bdd2;
+  --accent-strong: #5aa3bb;
+  --accent-soft: rgba(120, 189, 210, 0.12);
+  --accent-softer: rgba(120, 189, 210, 0.06);
+  --mint: #79c2b2;
+  --mint-soft: rgba(96, 168, 158, 0.14);
+  --amber: #d9b884;
+  --amber-soft: rgba(217, 184, 132, 0.12);
+  --rose: #e08f99;
+  --rose-soft: rgba(224, 143, 153, 0.12);
+  --violet: #b5b0e0;
+  --violet-soft: rgba(181, 176, 224, 0.12);
 
-  --gradient: linear-gradient(135deg, #8aa7ff 0%, #6ee7c0 100%);
-  --gradient-soft: linear-gradient(135deg, rgba(138, 167, 255, 0.16), rgba(110, 231, 192, 0.08));
+  --lux-1: #e9f6fa;
+  --lux-2: #9fd3e2;
+  --lux-3: #659eb4;
+  --lux-4: #4a7d92;
+  --lux-5: #33586b;
+  --hairline: linear-gradient(90deg, transparent, rgba(120, 189, 210, 0.4), transparent);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 10px 30px -12px rgba(0, 0, 0, 0.65);
-  --shadow-lg: 0 30px 80px -30px rgba(0, 0, 0, 0.8);
-  --glow: 0 0 0 1px rgba(124, 156, 255, 0.18), 0 18px 50px -20px rgba(124, 156, 255, 0.4);
+  --gradient: linear-gradient(135deg, #e9f6fa 0%, #9fd3e2 46%, #659eb4 100%);
+  --gradient-soft: linear-gradient(135deg, rgba(222, 243, 249, 0.14), rgba(120, 189, 210, 0.05));
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 18px 44px -24px rgba(0, 0, 0, 0.88);
+  --shadow-lg: 0 46px 120px -46px rgba(0, 0, 0, 0.94);
+  --glow: 0 0 0 1px rgba(120, 189, 210, 0.2), 0 22px 64px -26px rgba(56, 132, 168, 0.4);
 
   --font-sans:
     'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display:
+    'Playfair Display Variable', 'Playfair Display', 'Cormorant Garamond', Georgia,
+    'Times New Roman', serif;
   --font-mono:
     'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
-  --radius-xs: 6px;
-  --radius-sm: 9px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 22px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
 
-  --sidebar-width: 264px;
+  --sidebar-width: 268px;
   --topbar-height: 64px;
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -93,8 +104,21 @@ body::before {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(900px 500px at 12% -10%, rgba(124, 156, 255, 0.09), transparent 60%),
-    radial-gradient(700px 420px at 92% 0%, rgba(110, 231, 192, 0.05), transparent 65%);
+    radial-gradient(1100px 640px at 12% -12%, rgba(56, 132, 168, 0.16), transparent 62%),
+    radial-gradient(880px 520px at 94% -4%, rgba(24, 96, 124, 0.1), transparent 66%),
+    radial-gradient(1200px 900px at 82% 112%, rgba(12, 58, 84, 0.24), transparent 62%),
+    radial-gradient(120% 90% at 50% 0%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* Fine film grain keeps large obsidian fields from looking flat. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 #root {
@@ -147,6 +171,15 @@ h6 {
   text-wrap: balance;
 }
 
+/* Editorial display face for headlines; UI text stays in Inter. */
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  line-height: 1.08;
+}
+
 p {
   text-wrap: pretty;
 }
@@ -158,8 +191,8 @@ kbd {
 }
 
 ::selection {
-  background: rgba(124, 156, 255, 0.32);
-  color: #fff;
+  background: rgba(120, 189, 210, 0.32);
+  color: var(--lux-1);
 }
 
 :focus-visible {
@@ -178,13 +211,13 @@ kbd {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #242c3c;
+  background: #1b3546;
   border-radius: 99px;
   border: 2px solid var(--bg);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #323d52;
+  background: #2a4f63;
 }
 
 /* ── Utilities ─────────────────────────────────────────────── */
@@ -279,9 +312,27 @@ kbd {
 }
 
 .link:hover {
-  color: #a5b9ff;
+  color: var(--lux-1);
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.lux-text {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.serif {
+  font-family: var(--font-display);
+}
+
+.hairline {
+  display: block;
+  height: 1px;
+  border: 0;
+  background: var(--hairline);
 }
 
 .nowrap {

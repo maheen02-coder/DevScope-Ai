@@ -59,6 +59,6 @@ describe('formatting helpers', () => {
 
   it('falls back to the accent color for unknown languages', () => {
     expect(languageColor('JavaScript')).toBe('#f1e05a')
-    expect(languageColor('UnknownLang')).toBe('#7c9cff')
+    expect(languageColor('UnknownLang')).toBe('#78bdd2')
   })
 })

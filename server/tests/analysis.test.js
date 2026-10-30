@@ -176,6 +176,36 @@ describe('repository analysis and report ownership', () => {
     expect(stillThere.status).toBe(200)
   })
 
+  it('retries once with more output tokens when the model returns malformed JSON', async () => {
+    mockState.ai.mode = 'json_invalid_once'
+    const response = await runAnalysis(agent)
+    expect(response.status).toBe(201)
+
+    expect(mockState.ai.requests).toHaveLength(2)
+    const [firstRequest, retryRequest] = mockState.ai.requests
+    expect(firstRequest.reasoning_effort).toBe('low')
+    expect(retryRequest.reasoning_effort).toBe('low')
+    expect(retryRequest.temperature).toBe(0)
+    expect(retryRequest.max_completion_tokens).toBeGreaterThan(firstRequest.max_completion_tokens)
+    expect(response.body.report.analysis.meta.jsonRetries).toBe(1)
+    expect(response.body.report.analysis.meta.modelCalls).toBe(2)
+
+    const usage = await agent.get('/api/dashboard/usage')
+    expect(usage.body.analysis.used).toBe(1)
+  })
+
+  it('explains malformed JSON output and releases the quota when retrying fails', async () => {
+    mockState.ai.mode = 'json_invalid_always'
+    const response = await runAnalysis(agent)
+    expect(response.status).toBe(502)
+    expect(response.body.error.code).toBe('AI_INVALID_JSON')
+    expect(response.body.error.message).toContain('malformed JSON')
+    expect(mockState.ai.calls).toBe(2)
+
+    const usage = await agent.get('/api/dashboard/usage')
+    expect(usage.body.analysis.used).toBe(0)
+  })
+
   it('releases the analysis quota when the AI response cannot be validated', async () => {
     mockState.ai.mode = 'invalid'
     const response = await runAnalysis(agent)

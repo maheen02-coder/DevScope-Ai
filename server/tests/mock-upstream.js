@@ -362,6 +362,21 @@ async function groqHandler(req, res, url) {
   }
 
   if (
+    mockState.ai.mode === 'json_invalid_always' ||
+    (mockState.ai.mode === 'json_invalid_once' && mockState.ai.calls === 1)
+  ) {
+    return jsonResponse(res, 400, {
+      error: {
+        message:
+          "Failed to generate JSON. Please adjust your prompt. See 'failed_generation' for more details.",
+        type: 'invalid_request_error',
+        code: 'json_validate_failed',
+        failed_generation: '',
+      },
+    })
+  }
+
+  if (
     mockState.ai.mode === 'tpm_always' ||
     (mockState.ai.mode === 'tpm_once' && mockState.ai.calls === 1)
   ) {

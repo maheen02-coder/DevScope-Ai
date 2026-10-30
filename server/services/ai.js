@@ -198,6 +198,24 @@ function isThroughputLimitError(error) {
   return /tokens per minute|\bTPM\b/i.test(providerDetail(error)) || error?.error?.type === 'tokens'
 }
 
+function isJsonValidationError(error) {
+  if (error?.status !== 400) return false
+  const detail = providerDetail(error)
+  return (
+    /json_validate_failed/i.test(detail) ||
+    /failed to (?:validate|generate) json/i.test(detail) ||
+    /does not match the expected schema/i.test(detail)
+  )
+}
+
+function providerErrorCode(error) {
+  const direct = error?.error?.code || error?.code
+  if (direct) return direct
+  // groq-sdk surfaces the raw response body in `message` for some 400s.
+  const match = String(error?.message || '').match(/"code"\s*:\s*"([^"]+)"/)
+  return match ? match[1] : null
+}
+
 function describeContextProblem(limits, estimatedTokens) {
   if (!limits) {
     return 'The repository context exceeds the model context window. Reduce AI_MAX_FILES or AI_MAX_FILE_TOKENS, or configure a larger-context GROQ_MODEL.'
@@ -289,10 +307,30 @@ function providerError(error, { limits, estimatedTokens, analysisMode, requestLi
     )
   }
   if (status === 400) {
+    if (isJsonValidationError(error)) {
+      return new ApiError(
+        502,
+        'AI_INVALID_JSON',
+        'The AI model returned malformed JSON, so the provider rejected the response. Please run the analysis again; if it keeps happening, raise AI_MAX_OUTPUT_TOKENS.',
+        {
+          provider: 'groq',
+          model: limits?.model ?? null,
+          mode: analysisMode ?? null,
+          suggestion:
+            'Increase AI_MAX_OUTPUT_TOKENS (for example 4096) so the JSON analysis has more room to finish.',
+        },
+      )
+    }
     return new ApiError(
       502,
       'AI_BAD_REQUEST',
       'The AI provider rejected the request. Check the configured model.',
+      {
+        provider: 'groq',
+        model: limits?.model ?? null,
+        providerCode: providerErrorCode(error),
+        mode: analysisMode ?? null,
+      },
     )
   }
   return new ApiError(
@@ -653,6 +691,7 @@ function createStats() {
   return {
     modelCalls: 0,
     contextRetries: 0,
+    jsonRetries: 0,
     providerRequestLimit: 0,
     estimatedInputTokens: 0,
     inputChars: 0,
@@ -678,7 +717,18 @@ async function rawComplete(messages, options) {
     temperature: options.temperature,
     max_completion_tokens: options.maxTokens,
     ...(options.json ? { response_format: { type: 'json_object' } } : {}),
+    // gpt-oss models spend part of max_completion_tokens on hidden reasoning.
+    // Low effort keeps that budget available for the JSON payload instead of
+    // letting the response get truncated mid-object.
+    ...(options.reasoningEffort ? { reasoning_effort: options.reasoningEffort } : {}),
   })
+}
+
+function jsonCompletionOptions(limits, temperature) {
+  const config = getConfig()
+  const options = { temperature, maxTokens: limits.maxOutputTokens, json: true }
+  if (/^openai\/gpt-oss/i.test(String(config.groqModel))) options.reasoningEffort = 'low'
+  return options
 }
 
 function retryTargetTokens(stats, primaryTokens) {
@@ -714,6 +764,38 @@ async function completeWithRetry({
         : requestLimit
     }
     if (!isContextLengthError(error) || !enableShrink) {
+      if (isJsonValidationError(error)) {
+        // Malformed or truncated JSON is usually transient: give the model more
+        // output room and a deterministic temperature before surfacing it.
+        const tpmLimited = Number(stats.providerRequestLimit) > 0
+        const bumpedTokens = Math.min(
+          options.maxTokens + 1024,
+          6000,
+          tpmLimited ? stats.providerRequestLimit - primaryTokens : 6000,
+        )
+        if (bumpedTokens > options.maxTokens) {
+          stats.jsonRetries += 1
+          stats.modelCalls += 1
+          stats.estimatedInputTokens += primaryTokens
+          stats.inputChars += messagesChars(primary)
+          try {
+            const completion = await rawComplete(primary, {
+              ...options,
+              temperature: 0,
+              maxTokens: bumpedTokens,
+            })
+            recordUsage(stats, completion)
+            return { completion, shrunk: false, targetTokens: 0 }
+          } catch (retryError) {
+            throw providerError(retryError, {
+              limits,
+              estimatedTokens: primaryTokens,
+              analysisMode,
+              requestLimit: providerRequestLimit(retryError),
+            })
+          }
+        }
+      }
       throw providerError(error, {
         limits,
         estimatedTokens: primaryTokens,
@@ -867,7 +949,7 @@ async function analyzeSingle(context, limits, stats) {
       }
       return analysisMessages(source, files)
     },
-    options: { temperature: 0.15, maxTokens: limits.maxOutputTokens, json: true },
+    options: jsonCompletionOptions(limits, 0.15),
     stats,
     limits,
     analysisMode: 'single',
@@ -880,7 +962,7 @@ async function analyzeSingle(context, limits, stats) {
     const issue = validationIssue(normalizeAnalysis(raw), analysisSchema)
     const repaired = await completeWithRetry({
       buildMessages: () => analysisMessages(source, files, { repairIssue: issue }),
-      options: { temperature: 0, maxTokens: limits.maxOutputTokens, json: true },
+      options: jsonCompletionOptions(limits, 0),
       stats,
       limits,
       analysisMode: 'single',
@@ -1080,7 +1162,7 @@ async function analyzeBatched(context, limits, stats) {
           }
           return batchMessages(source, used, batchNumber, total)
         },
-        options: { temperature: 0.15, maxTokens: limits.maxOutputTokens, json: true },
+        options: jsonCompletionOptions(limits, 0.15),
         stats,
         limits,
         analysisMode: 'batched',
@@ -1094,7 +1176,7 @@ async function analyzeBatched(context, limits, stats) {
         const issue = validationIssue(raw, batchFindingsSchema)
         const repaired = await completeWithRetry({
           buildMessages: () => batchMessages(source, used, batchNumber, total, issue),
-          options: { temperature: 0, maxTokens: limits.maxOutputTokens, json: true },
+          options: jsonCompletionOptions(limits, 0),
           stats,
           limits,
           analysisMode: 'batched',
@@ -1205,7 +1287,7 @@ async function analyzeBatched(context, limits, stats) {
       }
       return synthesisMessages()
     },
-    options: { temperature: 0.15, maxTokens: limits.maxOutputTokens, json: true },
+    options: jsonCompletionOptions(limits, 0.15),
     stats,
     limits,
     analysisMode: 'batched',
@@ -1217,7 +1299,7 @@ async function analyzeBatched(context, limits, stats) {
     const issue = validationIssue(normalizeAnalysis(raw), analysisSchema)
     const repaired = await completeWithRetry({
       buildMessages: () => synthesisMessages(issue),
-      options: { temperature: 0, maxTokens: limits.maxOutputTokens, json: true },
+      options: jsonCompletionOptions(limits, 0),
       stats,
       limits,
       analysisMode: 'batched',
@@ -1298,6 +1380,7 @@ export async function analyzeRepository(context) {
     batches: result.batches,
     batchFailures: result.batchFailures,
     contextRetries: stats.contextRetries,
+    jsonRetries: stats.jsonRetries,
     providerRequestLimit: stats.providerRequestLimit || null,
     modelCalls: stats.modelCalls,
     estimatedInputTokens: stats.estimatedInputTokens,
@@ -1314,6 +1397,7 @@ export async function analyzeRepository(context) {
       batches: result.batches,
       modelCalls: stats.modelCalls,
       contextRetries: stats.contextRetries,
+      jsonRetries: stats.jsonRetries,
       providerRequestLimit: stats.providerRequestLimit || null,
       batchFailures: result.batchFailures,
       estimatedInputTokens: stats.estimatedInputTokens,

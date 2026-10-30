@@ -68,8 +68,8 @@ function TrendChart({ points }) {
     >
       <defs>
         <linearGradient id="trend-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7c9cff" stopOpacity="0.28" />
-          <stop offset="100%" stopColor="#7c9cff" stopOpacity="0" />
+          <stop offset="0%" stopColor="#78bdd2" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#78bdd2" stopOpacity="0" />
         </linearGradient>
       </defs>
       {[0.25, 0.5, 0.75].map((ratio) => (
@@ -79,7 +79,7 @@ function TrendChart({ points }) {
           y1={pad + ratio * (height - pad * 2)}
           x2={width - pad}
           y2={pad + ratio * (height - pad * 2)}
-          stroke="rgba(255,255,255,0.05)"
+          stroke="rgba(148,180,196,0.09)"
           strokeWidth="1"
         />
       ))}
@@ -87,7 +87,7 @@ function TrendChart({ points }) {
       <polyline
         points={line}
         fill="none"
-        stroke="#7c9cff"
+        stroke="#78bdd2"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -98,8 +98,8 @@ function TrendChart({ points }) {
           cx={coord.x}
           cy={coord.y}
           r="2.4"
-          fill="#0b0e15"
-          stroke="#7c9cff"
+          fill="#04070a"
+          stroke="#78bdd2"
           strokeWidth="1.6"
         >
           <title>{coord.score}/100</title>

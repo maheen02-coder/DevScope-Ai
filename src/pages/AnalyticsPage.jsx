@@ -30,10 +30,10 @@ ChartJS.register(
   Tooltip,
 )
 
-const ACCENT = '#7c9cff'
-const MINT = '#6ee7b7'
-const GRID = 'rgba(255,255,255,0.06)'
-const MUTED = '#94a3b8'
+const ACCENT = '#78bdd2'
+const MINT = '#79c2b2'
+const GRID = 'rgba(148, 180, 196, 0.09)'
+const MUTED = '#879caa'
 
 const baseOptions = {
   responsive: true,
@@ -41,7 +41,7 @@ const baseOptions = {
   color: MUTED,
   plugins: {
     legend: { labels: { color: MUTED, boxWidth: 10, boxHeight: 10, usePointStyle: true } },
-    tooltip: { backgroundColor: '#111827', borderColor: '#1f2937', borderWidth: 1 },
+    tooltip: { backgroundColor: '#08111a', borderColor: '#1a3040', borderWidth: 1 },
   },
   scales: {
     x: { grid: { color: GRID }, ticks: { color: MUTED } },
@@ -105,8 +105,8 @@ export default function AnalyticsPage() {
         label: 'Overall score',
         data: trend.map((point) => point.overall),
         borderColor: ACCENT,
-        backgroundColor: 'rgba(124,156,255,0.16)',
-        pointBackgroundColor: '#0b0e15',
+        backgroundColor: 'rgba(120,189,210,0.16)',
+        pointBackgroundColor: '#04070a',
         pointBorderColor: ACCENT,
         pointRadius: 3,
         borderWidth: 2,
@@ -122,7 +122,7 @@ export default function AnalyticsPage() {
       {
         data: languages.map((entry) => entry.count),
         backgroundColor: languages.map((entry) => languageColor(entry.language)),
-        borderColor: '#0b0e15',
+        borderColor: '#04070a',
         borderWidth: 2,
       },
     ],
@@ -140,7 +140,7 @@ export default function AnalyticsPage() {
       {
         label: 'Remaining',
         data: [usage?.analysis?.remaining ?? 0, usage?.chat?.remaining ?? 0],
-        backgroundColor: 'rgba(110,231,183,0.45)',
+        backgroundColor: 'rgba(121,194,178,0.45)',
         borderRadius: 6,
       },
     ],
@@ -151,8 +151,8 @@ export default function AnalyticsPage() {
     datasets: [
       {
         data: [stats.saved, Math.max(0, stats.total - stats.saved)],
-        backgroundColor: [MINT, 'rgba(148,163,184,0.35)'],
-        borderColor: '#0b0e15',
+        backgroundColor: [MINT, 'rgba(135,156,170,0.35)'],
+        borderColor: '#04070a',
         borderWidth: 2,
       },
     ],
