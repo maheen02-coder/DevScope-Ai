@@ -1,0 +1,5 @@
+Contact: https://github.com/maheen02-coder/DevScope-Ai/security/advisories/new
+Expires: 2027-10-30T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://github.com/maheen02-coder/DevScope-Ai/blob/main/public/.well-known/security.txt
+Policy: https://github.com/maheen02-coder/DevScope-Ai/blob/main/SECURITY.md
