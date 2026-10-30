@@ -708,6 +708,27 @@
 
 /**
  * @openapi
+ * /dashboard/rate-limits:
+ *   get:
+ *     tags: [Dashboard]
+ *     summary: Rate-limit and quota report
+ *     description: >
+ *       Per-user rolling quota, hourly quota consumption, the configured endpoint limiter
+ *       policies, process-wide throttled-request counters, and the latest GitHub API budget.
+ *       Throttle counters live in memory and reset when the API process restarts.
+ *     security: [{ cookieAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Live rate-limit report.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/RateLimitReport' }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+
+/**
+ * @openapi
  * /public/reports/{token}:
  *   get:
  *     tags: [Public]

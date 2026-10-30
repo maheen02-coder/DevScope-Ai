@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   ArrowLeftRight,
+  ArrowUpRight,
   BarChart3,
   ChevronRight,
   Compass,
   FileText,
+  Gauge,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -28,6 +30,7 @@ const navItems = [
   { to: '/explore', label: 'Explore', icon: Compass },
   { to: '/reports', label: 'Reports', icon: FileText },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/limits', label: 'Rate limits', icon: Gauge },
   { to: '/compare', label: 'Compare', icon: ArrowLeftRight },
   { to: '/chat', label: 'AI Chat', icon: MessagesSquare },
   { to: '/settings', label: 'Settings', icon: Settings },
@@ -149,6 +152,10 @@ export default function AppLayout() {
             resetsAt={chat?.resetsAt}
             compact
           />
+          <Link to="/limits" className="sidebar__usage-link" onClick={() => setNavOpen(false)}>
+            Open rate-limit report
+            <ArrowUpRight size={12} aria-hidden="true" />
+          </Link>
         </div>
 
         <div className="sidebar__spacer" />

@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import AnalyticsPage from './pages/AnalyticsPage.jsx'
+import RateLimitsPage from './pages/RateLimitsPage.jsx'
 import ExplorePage from './pages/ExplorePage.jsx'
 import GithubUserPage from './pages/GithubUserPage.jsx'
 import RepoPage from './pages/RepoPage.jsx'
@@ -72,6 +73,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/limits" element={<RateLimitsPage />} />
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/u/:username" element={<GithubUserPage />} />
             <Route path="/r/:owner/:repo" element={<RepoPage />} />

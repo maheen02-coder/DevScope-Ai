@@ -103,25 +103,89 @@ const definition = {
           createdAt: { type: 'string', format: 'date-time' },
         },
       },
+      QuotaBucket: {
+        type: 'object',
+        properties: {
+          kind: { type: 'string', enum: ['analysis', 'chat'] },
+          used: { type: 'integer' },
+          limit: { type: 'integer' },
+          remaining: { type: 'integer' },
+          resetsAt: { type: 'string', format: 'date-time', nullable: true },
+        },
+      },
       Quota: {
         type: 'object',
         properties: {
-          analysis: {
-            type: 'object',
-            properties: {
-              used: { type: 'integer' },
-              limit: { type: 'integer' },
-              remaining: { type: 'integer' },
-              resetAt: { type: 'string', format: 'date-time' },
+          analysis: { $ref: '#/components/schemas/QuotaBucket' },
+          chat: { $ref: '#/components/schemas/QuotaBucket' },
+          windowHours: { type: 'integer', example: 24 },
+        },
+      },
+      RateLimitReport: {
+        type: 'object',
+        properties: {
+          generatedAt: { type: 'string', format: 'date-time' },
+          enforced: {
+            type: 'boolean',
+            description: 'Whether the endpoint limiters are active for this process.',
+          },
+          windowHours: { type: 'integer' },
+          quota: { $ref: '#/components/schemas/Quota' },
+          timeline: {
+            type: 'array',
+            description: 'Hourly quota consumption for the rolling window, oldest first.',
+            items: {
+              type: 'object',
+              properties: {
+                start: { type: 'string', format: 'date-time' },
+                analysis: { type: 'integer' },
+                chat: { type: 'integer' },
+              },
             },
           },
-          chat: {
+          policies: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                key: { type: 'string' },
+                label: { type: 'string' },
+                scope: { type: 'string' },
+                windowMs: { type: 'integer' },
+                limit: { type: 'integer' },
+                description: { type: 'string' },
+              },
+            },
+          },
+          throttle: {
+            type: 'object',
+            description:
+              'Throttled requests counted in memory since this API process started. Restarts reset the tally.',
+            properties: {
+              total: { type: 'integer' },
+              since: { type: 'string', format: 'date-time' },
+              scopes: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    key: { type: 'string' },
+                    label: { type: 'string' },
+                    count: { type: 'integer' },
+                    lastHitAt: { type: 'string', format: 'date-time', nullable: true },
+                  },
+                },
+              },
+            },
+          },
+          github: {
             type: 'object',
             properties: {
-              used: { type: 'integer' },
-              limit: { type: 'integer' },
-              remaining: { type: 'integer' },
-              resetAt: { type: 'string', format: 'date-time' },
+              configured: { type: 'boolean' },
+              limit: { type: 'integer', nullable: true },
+              remaining: { type: 'integer', nullable: true },
+              resetAt: { type: 'string', format: 'date-time', nullable: true },
+              checkedAt: { type: 'string', format: 'date-time', nullable: true },
             },
           },
         },

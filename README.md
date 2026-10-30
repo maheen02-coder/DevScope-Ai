@@ -167,6 +167,16 @@ The application is a single Node service: an Express API that also serves the bu
   time, language distribution, rolling quota usage (used vs. remaining), and the saved/unsaved
   report split. Everything is computed from stored dashboard data — no extra AI calls.
 
+### Rate limits
+
+- A live rate-limit dashboard (`/limits`) reads `/api/dashboard/rate-limits`: rolling 24-hour
+  analysis and chat quotas with reset countdowns, hourly quota consumption, every configured
+  express-rate-limit policy, process-wide throttle counters, and the latest GitHub API budget.
+- Quota denials (`QUOTA_EXCEEDED`) and endpoint throttles (`RATE_LIMITED`) are counted separately.
+  Throttle counters live in memory and reset with the API process; quotas persist in SQLite.
+- The policies are defined once in `server/middleware/security.js` and served from that same
+  definition, so the dashboard always matches enforcement.
+
 ### Observability
 
 - Structured JSON logs with pino and pino-http, including a request id echoed in `X-Request-Id`.
@@ -431,6 +441,7 @@ All routes are under `/api`.
 | GET    | `/chat/history`, `/chat/conversations` | History and conversation list.            |
 | DELETE | `/chat/history`                   | Clear history for a repository.                |
 | GET    | `/dashboard`, `/dashboard/usage`  | Aggregates and rolling quota summary.          |
+| GET    | `/dashboard/rate-limits`          | Quotas, endpoint policies, throttles, GitHub budget. |
 
 Errors are JSON: `{ "error": { "code": "...", "message": "...", "details": ... } }`.
 

@@ -1,6 +1,7 @@
 import { getConfig } from '../config.js'
 import { getDb } from '../db.js'
 import { ApiError } from '../lib/errors.js'
+import { recordThrottle } from '../lib/rateLimitStats.js'
 
 const WINDOW_MS = 24 * 60 * 60 * 1000
 
@@ -23,6 +24,10 @@ export function consumeQuota(userId, kind, repoFullName = null) {
     .all(userId, kind, windowStart)
 
   if (recent.length >= limit) {
+    recordThrottle(
+      `quota-${kind}`,
+      kind === 'analysis' ? 'Analysis daily quota' : 'Chat daily quota',
+    )
     const oldest = recent[0]
     const resetsAt = new Date(new Date(oldest.created_at).getTime() + WINDOW_MS).toISOString()
     throw new ApiError(
@@ -79,4 +84,41 @@ export function getQuotaSummary(userId) {
     chat: summarize(userId, 'chat'),
     windowHours: 24,
   }
+}
+
+const HOUR_MS = 60 * 60 * 1000
+
+export function getUsageTimeline(userId, hours = 24) {
+  const db = getDb()
+  const bucketMs = HOUR_MS
+  const currentBucket = Math.floor(Date.now() / bucketMs) * bucketMs
+  const firstBucket = currentBucket - (hours - 1) * bucketMs
+
+  const rows = db
+    .prepare(
+      `SELECT kind, created_at FROM usage_events
+       WHERE user_id = ? AND created_at >= ?`,
+    )
+    .all(userId, new Date(firstBucket).toISOString())
+
+  const buckets = new Map()
+  for (let index = 0; index < hours; index += 1) {
+    const start = firstBucket + index * bucketMs
+    buckets.set(start, {
+      start: new Date(start).toISOString(),
+      analysis: 0,
+      chat: 0,
+    })
+  }
+
+  for (const row of rows) {
+    if (row.kind !== 'analysis' && row.kind !== 'chat') continue
+    const time = new Date(row.created_at).getTime()
+    if (Number.isNaN(time)) continue
+    const start = Math.floor(time / bucketMs) * bucketMs
+    const bucket = buckets.get(start)
+    if (bucket) bucket[row.kind] += 1
+  }
+
+  return [...buckets.values()]
 }

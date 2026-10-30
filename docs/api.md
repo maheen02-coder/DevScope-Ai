@@ -64,6 +64,7 @@ Common codes: `UNAUTHORIZED`, `SESSION_EXPIRED`, `INVALID_CREDENTIALS`, `CSRF_BL
 | GET/POST/DELETE | `/reports/:id/notes`, `/reports/:id/share` | Notes and share links |
 | POST/GET/DELETE | `/chat/message`, `/chat/history`, `/chat/conversations` | Chat |
 | GET | `/dashboard`, `/dashboard/usage` | Aggregates and quotas |
+| GET | `/dashboard/rate-limits` | Quotas, endpoint policies, throttles, GitHub budget |
 | GET | `/public/reports/:token[/badge.svg]` | Shared reports and badges |
 | GET | `/metrics` | Prometheus metrics (token-protected in production) |
 

@@ -3,6 +3,7 @@ import cors from 'cors'
 import rateLimit from 'express-rate-limit'
 import { getConfig } from '../config.js'
 import { ApiError } from '../lib/errors.js'
+import { recordThrottle } from '../lib/rateLimitStats.js'
 
 export function securityHeaders() {
   const config = getConfig()
@@ -85,7 +86,74 @@ export function jsonContentTypeGuard(req, res, next) {
   next()
 }
 
-export function createLimiter({ windowMs, limit, message }) {
+const policyDefinitions = [
+  {
+    key: 'global',
+    label: 'Workspace API',
+    scope: '/api/*',
+    windowMs: 15 * 60_000,
+    limit: 600,
+    description: 'Umbrella ceiling for every API request from one address.',
+    message: 'Too many requests. Please slow down.',
+  },
+  {
+    key: 'auth',
+    label: 'Authentication',
+    scope: '/api/auth/*',
+    windowMs: 15 * 60_000,
+    limit: 40,
+    description: 'Sign-in, registration, and OAuth attempts per address.',
+    message: 'Too many authentication attempts. Try again in a few minutes.',
+  },
+  {
+    key: 'github',
+    label: 'GitHub proxy',
+    scope: '/api/github/*',
+    windowMs: 15 * 60_000,
+    limit: 300,
+    description: 'Repository and user lookups proxied through the GitHub API.',
+  },
+  {
+    key: 'analyze',
+    label: 'Analysis runs',
+    scope: '/api/analyze',
+    windowMs: 10 * 60_000,
+    limit: 12,
+    description: 'AI analysis starts, before the daily quota is checked.',
+    message: 'Too many analysis requests. Wait a moment before starting another.',
+  },
+  {
+    key: 'chat',
+    label: 'Chat turns',
+    scope: '/api/chat/*',
+    windowMs: 5 * 60_000,
+    limit: 40,
+    description: 'AI chat messages, before the daily quota is checked.',
+    message: 'You are sending messages too quickly. Take a short break.',
+  },
+  {
+    key: 'public',
+    label: 'Shared reports',
+    scope: '/api/public/*',
+    windowMs: 15 * 60_000,
+    limit: 120,
+    description: 'Read-only share links, which do not require a session.',
+    message: 'Too many shared-report requests. Try again shortly.',
+  },
+]
+
+export const limiterPolicies = policyDefinitions.map(
+  ({ key, label, scope, windowMs, limit, description }) => ({
+    key,
+    label,
+    scope,
+    windowMs,
+    limit,
+    description,
+  }),
+)
+
+export function createLimiter({ windowMs, limit, message, key, label }) {
   return rateLimit({
     windowMs,
     limit,
@@ -93,6 +161,7 @@ export function createLimiter({ windowMs, limit, message }) {
     legacyHeaders: false,
     skip: () => !getConfig().rateLimitEnabled,
     handler(_req, res) {
+      if (key) recordThrottle(key, label)
       res.status(429).json({
         error: {
           code: 'RATE_LIMITED',
@@ -103,36 +172,16 @@ export function createLimiter({ windowMs, limit, message }) {
   })
 }
 
+function policyLimiter(key) {
+  const policy = policyDefinitions.find((entry) => entry.key === key)
+  return createLimiter(policy)
+}
+
 export const limiters = {
-  global: () =>
-    createLimiter({
-      windowMs: 15 * 60_000,
-      limit: 600,
-      message: 'Too many requests. Please slow down.',
-    }),
-  auth: () =>
-    createLimiter({
-      windowMs: 15 * 60_000,
-      limit: 40,
-      message: 'Too many authentication attempts. Try again in a few minutes.',
-    }),
-  github: () => createLimiter({ windowMs: 15 * 60_000, limit: 300 }),
-  analyze: () =>
-    createLimiter({
-      windowMs: 10 * 60_000,
-      limit: 12,
-      message: 'Too many analysis requests. Wait a moment before starting another.',
-    }),
-  chat: () =>
-    createLimiter({
-      windowMs: 5 * 60_000,
-      limit: 40,
-      message: 'You are sending messages too quickly. Take a short break.',
-    }),
-  public: () =>
-    createLimiter({
-      windowMs: 15 * 60_000,
-      limit: 120,
-      message: 'Too many shared-report requests. Try again shortly.',
-    }),
+  global: () => policyLimiter('global'),
+  auth: () => policyLimiter('auth'),
+  github: () => policyLimiter('github'),
+  analyze: () => policyLimiter('analyze'),
+  chat: () => policyLimiter('chat'),
+  public: () => policyLimiter('public'),
 }

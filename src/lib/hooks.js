@@ -35,3 +35,12 @@ export function useUsage() {
     staleTime: 20_000,
   })
 }
+
+export function useRateLimits() {
+  return useQuery({
+    queryKey: ['rate-limits'],
+    queryFn: () => api.get('/dashboard/rate-limits'),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  })
+}
