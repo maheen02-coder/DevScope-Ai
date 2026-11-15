@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { api, errorMessage } from './api.js'
+import { api, errorMessage, resolveApiBase } from './api.js'
 
 const originalWindow = globalThis.window
 let dispatchEvent
@@ -91,6 +91,25 @@ describe('API client session handling', () => {
     expect(error.status).toBe(404)
     expect(error.message).toContain('did not handle this request (HTTP 404)')
     expect(error.message).toContain('npm run dev:api')
+  })
+})
+
+describe('resolveApiBase', () => {
+  it('defaults to the same-origin API path', () => {
+    expect(resolveApiBase(undefined)).toBe('/api')
+    expect(resolveApiBase('   ')).toBe('/api')
+  })
+
+  it('appends /api to a bare host and tolerates a trailing slash', () => {
+    expect(resolveApiBase('https://devscope-ai.onrender.com')).toBe(
+      'https://devscope-ai.onrender.com/api',
+    )
+    expect(resolveApiBase('https://devscope-ai.onrender.com/')).toBe(
+      'https://devscope-ai.onrender.com/api',
+    )
+    expect(resolveApiBase('https://devscope-ai.onrender.com/api/')).toBe(
+      'https://devscope-ai.onrender.com/api',
+    )
   })
 })
 

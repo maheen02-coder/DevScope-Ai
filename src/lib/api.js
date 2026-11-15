@@ -1,6 +1,14 @@
 import { formatNumber, formatResetAt } from './format.js'
 
-const BASE = import.meta.env.VITE_API_BASE_URL || '/api'
+export function resolveApiBase(value) {
+  const base = String(value || '')
+    .trim()
+    .replace(/\/+$/, '')
+  if (!base) return '/api'
+  return base.endsWith('/api') ? base : `${base}/api`
+}
+
+const BASE = resolveApiBase(import.meta.env.VITE_API_BASE_URL)
 
 export class ApiError extends Error {
   constructor(status, code, message, details) {
