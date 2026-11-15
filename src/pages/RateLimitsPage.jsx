@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import clsx from 'clsx'
 import { errorMessage } from '../lib/api.js'
-import { formatDateTime, formatNumber, pluralize, timeAgo } from '../lib/format.js'
+import { formatDateTime, formatNumber, formatResetAt, pluralize, timeAgo } from '../lib/format.js'
 import { usePageTitle, useRateLimits } from '../lib/hooks.js'
 import {
   Alert,
@@ -487,7 +487,7 @@ export default function RateLimitsPage() {
                 <div className="fact-list budget-facts">
                   <div className="fact-row">
                     <span>Resets</span>
-                    <span>{formatDateTime(github.resetAt)}</span>
+                    <span>{formatResetAt(github.resetAt) || '—'}</span>
                   </div>
                   <div className="fact-row">
                     <span>Last checked</span>

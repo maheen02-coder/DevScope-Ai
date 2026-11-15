@@ -96,6 +96,23 @@ export function formatReset(value) {
   return `${Math.max(1, minutes)}m`
 }
 
+const resetAtFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZoneName: 'short',
+})
+
+export function formatResetAt(value) {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  const absolute = resetAtFormatter.format(date)
+  const relative = formatReset(value)
+  return relative && relative !== 'now' ? `${absolute} (in ${relative})` : absolute
+}
+
 export function initials(value) {
   return String(value || '?')
     .trim()

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   formatBytes,
   formatReset,
+  formatResetAt,
   languageColor,
   parseRepoInput,
   pluralize,
@@ -55,6 +56,14 @@ describe('formatting helpers', () => {
     expect(formatReset(new Date(Date.now() - 1000).toISOString())).toBe('now')
     expect(pluralize(1, 'report')).toBe('1 report')
     expect(pluralize(3, 'report')).toBe('3 reports')
+  })
+
+  it('formats GitHub reset timestamps as a clock time plus countdown', () => {
+    const inTenMinutes = new Date(Date.now() + 10 * 60_000 + 5_000).toISOString()
+    expect(formatResetAt(inTenMinutes)).toMatch(/\(in 10m\)$/)
+    expect(formatResetAt(new Date(Date.now() - 1_000).toISOString())).not.toContain('(in ')
+    expect(formatResetAt(null)).toBeNull()
+    expect(formatResetAt('not-a-date')).toBeNull()
   })
 
   it('falls back to the accent color for unknown languages', () => {

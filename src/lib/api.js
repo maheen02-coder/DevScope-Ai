@@ -1,3 +1,5 @@
+import { formatNumber, formatResetAt } from './format.js'
+
 const BASE = import.meta.env.VITE_API_BASE_URL || '/api'
 
 export class ApiError extends Error {
@@ -63,6 +65,23 @@ export const api = {
 }
 
 export function errorMessage(error, fallback = 'Something went wrong. Please try again.') {
+  if (error?.code === 'GITHUB_RATE_LIMITED') {
+    const details = error.details || {}
+    const configured = details.configured === true
+    const limit = Number(details.limit)
+    const perHour = Number.isFinite(limit) && limit > 0 ? formatNumber(limit) : '60'
+    const resetAt = formatResetAt(details.resetAt)
+    const parts = [
+      configured
+        ? `The server's GitHub token has used its ${perHour} requests/hour limit.`
+        : `GitHub's anonymous limit (${perHour} requests/hour) is used up.`,
+      resetAt ? `It resets at ${resetAt}.` : 'It resets on a rolling hourly window.',
+      configured
+        ? 'Try again after the reset.'
+        : 'Add a GITHUB_TOKEN on the server to raise the limit to 5,000 requests/hour.',
+    ]
+    return parts.join(' ')
+  }
   if (error?.message) return error.message
   return fallback
 }

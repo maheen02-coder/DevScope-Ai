@@ -238,7 +238,15 @@ export default function RepoPage() {
               </div>
               {readme ? (
                 <>
-                  <Markdown>{readme.content}</Markdown>
+                  <Markdown
+                    repo={{
+                      fullName: repo.fullName,
+                      branch: repo.defaultBranch,
+                      path: readme.path,
+                    }}
+                  >
+                    {readme.content}
+                  </Markdown>
                   {readme.truncated ? (
                     <p className="hint" style={{ marginTop: 16 }}>
                       This README was truncated for display. Open it on GitHub for the full content.

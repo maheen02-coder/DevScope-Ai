@@ -338,7 +338,12 @@ function mapGithubError(status, bodyText) {
         429,
         'GITHUB_RATE_LIMITED',
         'GitHub API rate limit reached. Configure a GITHUB_TOKEN or wait for the limit to reset.',
-        { resetAt: githubStatus.resetAt },
+        {
+          resetAt: githubStatus.resetAt,
+          limit: githubStatus.limit,
+          remaining: githubStatus.remaining,
+          configured: Boolean(getConfig().githubToken),
+        },
       )
     }
     return new ApiError(

@@ -16,9 +16,6 @@ import {
   X,
 } from 'lucide-react'
 import { formatNumber, formatReset, hasScore, initials, scoreTone } from '../lib/format.js'
-
-/* ── Button ────────────────────────────────────────────────── */
-
 export function Button({
   variant = 'secondary',
   size,
@@ -57,9 +54,6 @@ export function Button({
     </button>
   )
 }
-
-/* ── Form primitives ───────────────────────────────────────── */
-
 export function Field({ label, htmlFor, hint, error, optional, children, className }) {
   return (
     <div className={clsx('field', className)}>
@@ -80,7 +74,6 @@ export function Field({ label, htmlFor, hint, error, optional, children, classNa
     </div>
   )
 }
-
 export function PasswordField({
   id,
   label,
@@ -119,16 +112,12 @@ export function PasswordField({
     </Field>
   )
 }
-
-/* ── Alerts / states ───────────────────────────────────────── */
-
 const alertIcons = {
   info: Info,
   warning: TriangleAlert,
   error: CircleAlert,
   success: CheckCircle2,
 }
-
 export function Alert({ tone = 'info', title, children, icon, onDismiss, className }) {
   const Icon = icon || alertIcons[tone] || Info
   return (
@@ -149,7 +138,6 @@ export function Alert({ tone = 'info', title, children, icon, onDismiss, classNa
     </div>
   )
 }
-
 export function EmptyState({ icon: Icon = Info, title, description, actions, className }) {
   return (
     <div className={clsx('empty', className)}>
@@ -162,7 +150,6 @@ export function EmptyState({ icon: Icon = Info, title, description, actions, cla
     </div>
   )
 }
-
 export function ErrorState({
   title = 'Unable to load this',
   message,
@@ -191,7 +178,6 @@ export function ErrorState({
     </div>
   )
 }
-
 export function LoadingState({ label = 'Loading…' }) {
   return (
     <div className="empty" role="status" aria-live="polite">
@@ -200,7 +186,6 @@ export function LoadingState({ label = 'Loading…' }) {
     </div>
   )
 }
-
 export function Skeleton({ width = '100%', height = 12, circle, className, style }) {
   return (
     <div
@@ -210,15 +195,11 @@ export function Skeleton({ width = '100%', height = 12, circle, className, style
     />
   )
 }
-
-/* ── Scores ────────────────────────────────────────────────── */
-
 const ringConfig = {
   sm: { px: 54, stroke: 4.5 },
   md: { px: 86, stroke: 6 },
   lg: { px: 128, stroke: 8 },
 }
-
 export function ScoreRing({ score, size = 'md', label, className }) {
   const { px, stroke } = ringConfig[size] || ringConfig.md
   const scored = hasScore(score)
@@ -228,7 +209,6 @@ export function ScoreRing({ score, size = 'md', label, className }) {
   const offset = circumference - (value / 100) * circumference
   const tone = scoreTone(score)
   const numberSize = size === 'lg' ? 40 : size === 'md' ? 26 : 15
-
   return (
     <div
       className={clsx('score-ring', `score-ring--${size}`, className)}
@@ -552,7 +532,6 @@ export function Modal({
     document.body,
   )
 }
-
 export function ConfirmDialog({
   open,
   onClose,

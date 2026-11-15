@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
+  Braces,
   CheckCircle2,
   EyeOff,
   FileLock2,
   Fingerprint,
   GitBranch,
+  KeyRound,
   Layers,
   MessagesSquare,
   ScanSearch,
@@ -17,6 +19,7 @@ import {
 import { useAuth } from '../context/AuthContext.jsx'
 import { usePageTitle } from '../lib/hooks.js'
 import { Logo, ScopeMark } from '../components/Logo.jsx'
+import LandingBackground from '../components/LandingBackground.jsx'
 import { ScoreRing } from '../components/ui.jsx'
 
 const features = [
@@ -50,6 +53,16 @@ const features = [
     title: 'Reports you own',
     body: 'Analyses are scoped to your account. Every read, update, and delete checks ownership before a row is returned.',
   },
+  {
+    icon: KeyRound,
+    title: 'Accounts and sessions',
+    body: 'Register with an email and password — bcrypt-hashed, rate-limited, and bound to an HTTP-only SameSite cookie — or sign in with GitHub and Google when OAuth is configured.',
+  },
+  {
+    icon: Braces,
+    title: 'Comprehensive API docs',
+    body: 'Every endpoint is described in an OpenAPI 3 spec served at /api/docs and /api/openapi.json, with a narrative reference covering authentication, the error envelope, and each route.',
+  },
 ]
 
 const securityPoints = [
@@ -80,7 +93,8 @@ export default function LandingPage() {
   usePageTitle(null)
 
   return (
-    <div className="landing">
+    <div className="landing landing--immersive">
+      <LandingBackground />
       <header className="landing__nav">
         <div className="landing__nav-inner">
           <Logo to="/" />
@@ -365,6 +379,9 @@ export default function LandingPage() {
           <div className="landing__footer-links">
             <a href="#features">Capabilities</a>
             <a href="#security">Security</a>
+            <a href="/api/docs" target="_blank" rel="noreferrer">
+              API docs
+            </a>
             <Link to="/login">Sign in</Link>
             <Link to="/register">Create account</Link>
           </div>

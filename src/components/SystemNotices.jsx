@@ -1,6 +1,6 @@
 import { Alert } from './ui.jsx'
 import { useHealth } from '../lib/hooks.js'
-import { formatDateTime } from '../lib/format.js'
+import { formatResetAt } from '../lib/format.js'
 
 export function AiConfigNotice({ title = 'AI analysis requires a Groq API key' }) {
   const { data, isLoading, isError } = useHealth()
@@ -51,7 +51,7 @@ export function GitHubLimitNotice() {
           : `GitHub allows ${limit ?? 60} requests per hour without a token.`}{' '}
         Set <code>GITHUB_TOKEN</code> on the server to raise the hourly limit to 5,000 and make
         repository browsing more reliable.
-        {resetAt ? ` The current window resets ${formatDateTime(resetAt)}.` : ''}
+        {resetAt ? ` The current window resets at ${formatResetAt(resetAt)}.` : ''}
       </p>
     </Alert>
   )

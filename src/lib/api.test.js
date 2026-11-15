@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { api } from './api.js'
+import { api, errorMessage } from './api.js'
 
 const originalWindow = globalThis.window
 let dispatchEvent
@@ -74,5 +74,38 @@ describe('API client session handling', () => {
 
     await expect(api.delete('/users/me', { password: 'correct' })).resolves.toBeNull()
     expect(dispatchEvent).not.toHaveBeenCalled()
+  })
+})
+
+describe('errorMessage', () => {
+  it('shows the clock time when GitHub anonymous quota resets', () => {
+    const resetAt = new Date(Date.now() + 10 * 60_000 + 5_000).toISOString()
+    const message = errorMessage({
+      code: 'GITHUB_RATE_LIMITED',
+      message: 'GitHub API rate limit reached.',
+      details: { resetAt, limit: 60, remaining: 0, configured: false },
+    })
+
+    expect(message).toContain('anonymous limit (60 requests/hour)')
+    expect(message).toContain('It resets at')
+    expect(message).toContain('(in 10m)')
+    expect(message).toContain('5,000 requests/hour')
+  })
+
+  it('does not mention anonymous limits when a token is configured', () => {
+    const message = errorMessage({
+      code: 'GITHUB_RATE_LIMITED',
+      message: 'GitHub API rate limit reached.',
+      details: { configured: true, limit: 5000, resetAt: null },
+    })
+
+    expect(message).toContain('GitHub token')
+    expect(message).toContain('5,000 requests/hour')
+    expect(message).not.toContain('anonymous')
+  })
+
+  it('passes through other error messages', () => {
+    expect(errorMessage({ message: 'Nope.' })).toBe('Nope.')
+    expect(errorMessage({})).toBe('Something went wrong. Please try again.')
   })
 })
