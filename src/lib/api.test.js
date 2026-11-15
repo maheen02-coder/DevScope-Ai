@@ -75,6 +75,23 @@ describe('API client session handling', () => {
     await expect(api.delete('/users/me', { password: 'correct' })).resolves.toBeNull()
     expect(dispatchEvent).not.toHaveBeenCalled()
   })
+
+  it('explains non-JSON errors so an offline API is obvious', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response('<html>Not Found</html>', {
+          status: 404,
+          headers: { 'Content-Type': 'text/html' },
+        }),
+      ),
+    )
+
+    const error = await api.post('/auth/register', { email: 'a@b.co' }).catch((err) => err)
+    expect(error.status).toBe(404)
+    expect(error.message).toContain('did not handle this request (HTTP 404)')
+    expect(error.message).toContain('npm run dev:api')
+  })
 })
 
 describe('errorMessage', () => {

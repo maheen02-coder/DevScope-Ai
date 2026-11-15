@@ -41,10 +41,21 @@ async function request(path, { method = 'GET', body, signal } = {}) {
   }
 
   if (!response.ok) {
+    const apiMessage = data?.error?.message
+    const contentType = response.headers.get('content-type') || ''
+    const offlineHint =
+      response.status === 404 || response.status >= 500
+        ? `The DevScope API did not handle this request (HTTP ${response.status}). It may be starting up or not running — start it with "npm run dev:api" and try again.`
+        : `Request failed (${response.status}).`
+    const message =
+      apiMessage ||
+      (contentType.includes('application/json')
+        ? `Request failed (${response.status}).`
+        : offlineHint)
     const error = new ApiError(
       response.status,
       data?.error?.code || 'REQUEST_FAILED',
-      data?.error?.message || `Request failed (${response.status}).`,
+      message,
       data?.error?.details,
     )
     const sessionExpired = error.code === 'UNAUTHORIZED' || error.code === 'SESSION_EXPIRED'
