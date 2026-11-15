@@ -1,10 +1,22 @@
 import { io } from 'socket.io-client'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api'
+
+// A split deployment (static frontend + separate API host) must reach the socket on the API
+// origin; a relative base keeps the same-origin behavior used by the dev proxy.
+function socketOrigin() {
+  try {
+    return new URL(API_BASE).origin
+  } catch {
+    return undefined
+  }
+}
+
 let socket = null
 
 export function getRealtimeSocket() {
   if (!socket) {
-    socket = io({
+    socket = io(socketOrigin(), {
       path: '/socket.io',
       withCredentials: true,
       autoConnect: true,

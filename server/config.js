@@ -46,6 +46,13 @@ export function loadConfig(env = process.env) {
     throw new Error('JWT_SECRET must be at least 32 characters in production.')
   }
 
+  const requestedSameSite = String(env.COOKIE_SAMESITE || 'lax')
+    .trim()
+    .toLowerCase()
+  const cookieSameSite = ['lax', 'strict', 'none'].includes(requestedSameSite)
+    ? requestedSameSite
+    : 'lax'
+
   return {
     nodeEnv,
     isProd,
@@ -55,7 +62,8 @@ export function loadConfig(env = process.env) {
     jwtSecret,
     jwtExpiresIn: env.JWT_EXPIRES_IN || '7d',
     cookieName: 'devscope_session',
-    cookieSecure: bool(env.COOKIE_SECURE, isProd),
+    cookieSecure: bool(env.COOKIE_SECURE, isProd) || cookieSameSite === 'none',
+    cookieSameSite,
     trustProxy: bool(env.TRUST_PROXY, isProd),
     frontendOrigins: list(env.FRONTEND_ORIGIN, 'http://localhost:5173,http://localhost:4000'),
     databasePath: env.DATABASE_PATH || './data/devscope.db',

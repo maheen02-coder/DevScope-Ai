@@ -39,7 +39,7 @@ export function setSessionCookie(res, user) {
   const config = getConfig()
   res.cookie(config.cookieName, issueSessionToken(user), {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: config.cookieSameSite,
     secure: config.cookieSecure,
     path: '/',
     maxAge: durationToMs(config.jwtExpiresIn),
@@ -50,7 +50,7 @@ export function clearSessionCookie(res) {
   const config = getConfig()
   res.clearCookie(config.cookieName, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: config.cookieSameSite,
     secure: config.cookieSecure,
     path: '/',
   })

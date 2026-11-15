@@ -544,7 +544,9 @@ To publish on GitHub Pages, enable Pages for the repository and point it at the 
 The front end deploys to Vercel as a static SPA build, but the API and SQLite store need a Node
 host with a persistent disk (Render, Fly.io, Railway, or a VPS). Set `VITE_API_BASE_URL` at build
 time so the SPA reaches the API origin, and keep the API's `FRONTEND_ORIGIN` in sync with the
-Vercel domain. No demo URL is published from this repository.
+Vercel domain. Because the two hosts are different sites, also set `COOKIE_SAMESITE=none` (with
+`COOKIE_SECURE=true`) so the session cookie is sent cross-site. No demo URL is published from this
+repository.
 
 ### Manual
 
