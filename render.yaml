@@ -3,13 +3,13 @@ services:
     name: devscope-ai
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: starter
+    # Free instance type: no card required. The container filesystem is
+    # ephemeral, so accounts, saved reports, and sessions reset whenever the
+    # service sleeps (15 min idle) or redeploys. Add a disk on a paid plan to
+    # keep data permanently.
+    plan: free
     healthCheckPath: /api/health
     autoDeploy: true
-    disk:
-      name: devscope-data
-      mountPath: /app/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production

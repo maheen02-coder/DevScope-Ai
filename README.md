@@ -542,12 +542,14 @@ To publish on GitHub Pages, enable Pages for the repository and point it at the 
 ### Vercel
 
 The front end deploys to Vercel as a static SPA build, but the API and SQLite store need a Node
-host with a persistent disk (Render, Fly.io, Railway, or a VPS). The included `render.yaml`
-blueprint creates that service (Docker image plus a 1 GB disk) in one step. Set `VITE_API_BASE_URL`
-at build time so the SPA reaches the API origin, and keep the API's `FRONTEND_ORIGIN` in sync with
-the Vercel domain. Because the two hosts are different sites, also set `COOKIE_SAMESITE=none` (with
-`COOKIE_SECURE=true`) so the session cookie is sent cross-site. No demo URL is published from this
-repository.
+host (Render, Fly.io, Railway, or a VPS). The included `render.yaml` blueprint creates that service
+in one step on Render's free plan, which needs no payment card. Free instances have an ephemeral
+filesystem, so accounts, saved reports, and sessions reset whenever the service sleeps after 15
+minutes of inactivity or redeploys; attach a disk on a paid plan to keep data permanently. Set
+`VITE_API_BASE_URL` at build time so the SPA reaches the API origin, and keep the API's
+`FRONTEND_ORIGIN` in sync with the Vercel domain. Because the two hosts are different sites, also
+set `COOKIE_SAMESITE=none` (with `COOKIE_SECURE=true`) so the session cookie is sent cross-site. No
+demo URL is published from this repository.
 
 ### Manual
 
