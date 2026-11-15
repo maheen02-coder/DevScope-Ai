@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import request from 'supertest'
+import { getConfig, setConfig } from '../config.js'
 import { TEST_PASSWORD, registerUser, resetTestState, startTestEnvironment } from './helpers.js'
 
 let env
@@ -41,6 +42,24 @@ describe('authentication and sessions', () => {
     const me = await request(env.app).get('/api/auth/me').set('Cookie', cookie)
     expect(me.status).toBe(200)
     expect(me.body.user.email).toBe('ada@example.com')
+  })
+
+  it('uses cross-site cookies when the frontend is on another host', async () => {
+    const original = getConfig()
+    setConfig({ ...original, cookieSameSite: 'none', cookieSecure: true })
+    try {
+      const response = await request(env.app).post('/api/auth/register').send({
+        name: 'Cross Site',
+        email: 'cross-site@example.com',
+        password: TEST_PASSWORD,
+      })
+
+      const cookie = response.headers['set-cookie']?.[0] || ''
+      expect(cookie).toMatch(/SameSite=None/i)
+      expect(cookie).toMatch(/Secure/i)
+    } finally {
+      setConfig(original)
+    }
   })
 
   it('rejects duplicate email registration with a 409', async () => {
